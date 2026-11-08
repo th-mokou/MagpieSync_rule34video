@@ -36,3 +36,19 @@ func TestListFolderPageAcceptsRecognizedEmptyMarkup(t *testing.T) {
 		t.Fatalf("page = %+v", page)
 	}
 }
+
+func TestListFolderPageAcceptsEmptyWatchLaterList(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`<div class="ma-block" id="list_videos_my_favourite_videos" data-rdm-list="favourites" data-rdm-total="0" data-rdm-pg="1" data-rdm-per="12" data-rdm-of="0"><nav id="list_videos_my_favourite_videos_fav_selector"></nav><form><div class="fs-empty ma-empty"><h3>Nothing to watch later yet</h3></div></form></div>`))
+	}))
+	defer server.Close()
+
+	c := &Client{http: server.Client(), baseURL: server.URL + "/", userAgent: userAgent}
+	page, err := c.ListFolderPage(context.Background(), folderWatchLater, 1, 20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Items) != 0 || page.HasMore {
+		t.Fatalf("page = %+v", page)
+	}
+}

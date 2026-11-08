@@ -72,7 +72,24 @@ func parsePager(body []byte) (page, pages int) {
 }
 
 func recognizedVideoListPage(body []byte) bool {
-	return bytes.Contains(body, []byte("data-rdm-items"))
+	z := xhtml.NewTokenizer(bytes.NewReader(body))
+	for {
+		tt := z.Next()
+		if tt == xhtml.ErrorToken {
+			return false
+		}
+		if tt != xhtml.StartTagToken && tt != xhtml.SelfClosingTagToken {
+			continue
+		}
+		_, hasAttr := z.TagName()
+		if !hasAttr {
+			continue
+		}
+		attrs := tagAttrs(z)
+		if _, ok := attrs["data-rdm-items"]; ok || strings.TrimSpace(attrs["data-rdm-list"]) != "" {
+			return true
+		}
+	}
 }
 
 func folderPath(remoteID string, page int) (string, error) {
