@@ -117,11 +117,17 @@ func NewClientWithUserAgent(cookies map[string]string, proxyURL, ua string) (*Cl
 	}
 	if strings.TrimSpace(ua) != "" {
 		if strings.ContainsAny(ua, "\r\n") {
+			hc.CloseIdleConnections()
 			return nil, errors.New("rule34video: invalid user agent")
 		}
 		c.userAgent = ua
 	}
 	return c, nil
+}
+
+func (c *Client) Close() error {
+	c.http.CloseIdleConnections()
+	return nil
 }
 
 func cloneCookies(in map[string]string) map[string]string {
@@ -263,6 +269,7 @@ func Login(ctx context.Context, account, password, proxyURL string) (*Credential
 	if err != nil {
 		return nil, Profile{}, err
 	}
+	defer hc.CloseIdleConnections()
 	jar, err := newCookieJar()
 	if err != nil {
 		return nil, Profile{}, err

@@ -24,4 +24,4 @@ func (a *Adapter) ListFolderPage(ctx context.Context, remoteID string, page, pag
 	return a.client.ListFolderPage(ctx, remoteID, page, pageSize)
 }
 
-func (a *Adapter) Close() error { return nil }
+func (a *Adapter) Close() error { return a.client.Close() }

@@ -31,6 +31,7 @@ func (driver) CookieLogin(ctx context.Context, in sites.CookieInput) (*sites.Log
 	if err != nil {
 		return nil, &sites.AuthError{Kind: sites.AuthBadRequest, Message: err.Error(), Err: err}
 	}
+	defer client.Close()
 	profile, err := client.Profile(ctx)
 	if err != nil {
 		slog.Warn("rule34video profile check failed", "site", "rule34video", "cookies", cookieNames(cookies), "error", err)

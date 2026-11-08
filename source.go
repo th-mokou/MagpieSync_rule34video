@@ -50,4 +50,4 @@ func (r *directResolver) Options(ctx context.Context, pageURL string) ([]sites.D
 	return out, nil
 }
 
-func (r *directResolver) Close() error { return nil }
+func (r *directResolver) Close() error { return r.client.Close() }
