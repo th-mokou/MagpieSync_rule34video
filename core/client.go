@@ -207,7 +207,7 @@ func (c *Client) Playlists(ctx context.Context) ([]Playlist, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parsePlaylists(body), nil
+	return parsePlaylists(body)
 }
 
 func (c *Client) get(ctx context.Context, path string) ([]byte, error) {

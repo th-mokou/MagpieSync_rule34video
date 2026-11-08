@@ -15,15 +15,27 @@ func TestParseProfileAndPlaylists(t *testing.T) {
 	if p.UID != "469636" || p.Name != "kamik" {
 		t.Fatalf("profile = %+v", p)
 	}
-	playlists := parsePlaylists([]byte(`
+	playlists, err := parsePlaylists([]byte(`
 		<a class="ma-newcard" href="/create-playlist/">New playlist</a>
 		<div class="item ma-pl" data-rdm-item data-id="753975" data-title="233" data-count="2156" data-url="https://rule34video.com/my/playlists/753975/"></div>
 		<div class="item ma-pl" data-rdm-item data-id="128913" data-title="Marie &amp; Rose" data-count="6" data-url="/my/playlists/128913/"></div>`))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(playlists) != 2 || playlists[0].ID != "753975" || playlists[0].Count != 2156 {
 		t.Fatalf("playlists = %+v", playlists)
 	}
 	if playlists[1].Title != "Marie & Rose" || playlists[1].Count != 6 {
 		t.Fatalf("playlist title = %+v", playlists[1])
+	}
+}
+
+func TestParsePlaylistsRejectsUnexpectedMarkup(t *testing.T) {
+	if _, err := parsePlaylists([]byte(`<html><body>temporary error</body></html>`)); err == nil {
+		t.Fatal("expected unrecognized playlist page error")
+	}
+	if playlists, err := parsePlaylists([]byte(`<a class="ma-newcard" href="/create-playlist/">New playlist</a>`)); err != nil || len(playlists) != 0 {
+		t.Fatalf("empty playlist page = %+v, %v", playlists, err)
 	}
 }
 

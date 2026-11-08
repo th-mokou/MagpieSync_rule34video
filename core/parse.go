@@ -165,26 +165,35 @@ func parseVideoCards(body []byte) []syncpkg.RemoteItem {
 	}
 }
 
-func parsePlaylists(body []byte) []Playlist {
+func parsePlaylists(body []byte) ([]Playlist, error) {
 	z := xhtml.NewTokenizer(bytes.NewReader(body))
 	var out []Playlist
+	recognized := false
 	seen := map[string]bool{}
 	for {
 		tt := z.Next()
 		if tt == xhtml.ErrorToken {
-			return out
+			if !recognized {
+				return nil, fmt.Errorf("rule34video: playlist page structure not recognized")
+			}
+			return out, nil
 		}
 		if tt != xhtml.StartTagToken && tt != xhtml.SelfClosingTagToken {
 			continue
 		}
 		name, hasAttr := z.TagName()
-		if !hasAttr || string(name) != "div" {
+		if !hasAttr {
 			continue
 		}
 		attrs := tagAttrs(z)
-		if !containsClass(classTokens(attrs["class"]), "ma-pl") {
+		classes := classTokens(attrs["class"])
+		if containsClass(classes, "ma-newcard") {
+			recognized = true
+		}
+		if string(name) != "div" || !containsClass(classes, "ma-pl") {
 			continue
 		}
+		recognized = true
 		id := strings.TrimSpace(attrs["data-id"])
 		if id == "" || !digits(id) || seen[id] {
 			continue
