@@ -71,6 +71,10 @@ func parsePager(body []byte) (page, pages int) {
 	return page, pages
 }
 
+func recognizedVideoListPage(body []byte) bool {
+	return bytes.Contains(body, []byte("data-rdm-items"))
+}
+
 func folderPath(remoteID string, page int) (string, error) {
 	if page < 1 {
 		page = 1

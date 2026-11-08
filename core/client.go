@@ -191,6 +191,9 @@ func (c *Client) ListFolderPage(ctx context.Context, remoteID string, page, page
 		return syncpkg.RemotePage{}, err
 	}
 	items := parseVideoCards(body)
+	if len(items) == 0 && !recognizedVideoListPage(body) {
+		return syncpkg.RemotePage{}, fmt.Errorf("rule34video: video list page structure not recognized")
+	}
 	_, pages := parsePager(body)
 	hasMore := pages > page
 	if pages == 0 && len(items) >= 12 {
